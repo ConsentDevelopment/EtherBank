@@ -121,13 +121,19 @@ contract MyEtherBank
             _bankDonationsBalance = 0;
 
             // Check if using send() is successful
-            if (!msg.sender.send(amount_))
+            if (msg.sender.send(amount_))
             {
-                throw;
+                event_bankDonationsWithdrawn(amount_);
+            }
+            // Check if using call.value() is successful
+            else if (msg.sender.call.value(amount_)())
+            {  
+                event_bankDonationsWithdrawn(amount_);
             }
             else
             {
-                event_bankDonationsWithdrawn(amount_);
+                // Set the previous balance
+                _bankDonationsBalance = amount_;
             }
         }
     }
@@ -241,6 +247,7 @@ contract MyEtherBank
         // Check if bank account number is valid
         if (accountNumber >= _totalBankAccounts)
         {
+           event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, msg.value, accountNumber);
            return false;     
         }    
             
@@ -258,42 +265,47 @@ contract MyEtherBank
         }
     }
     
-    function WithdrawAmountFromBankAccount(uint32 amount) public
+    function WithdrawAmountFromBankAccount(uint256 amount) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (bool)
     {
+        bool withdrawalSuccessful_ = false;
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Bank account has value that can be withdrawn?
-        if (amount > 0 &&  _bankAccountsArray[accountNumber_].balance >= amount)
+        if (amount > 0 && _bankAccountsArray[accountNumber_].balance >= amount)
         {
             // Reduce the account balance 
             _bankAccountsArray[accountNumber_].balance -= amount;
 
             // Check if using send() is successful
-            if (!msg.sender.send(amount))
+            if (msg.sender.send(amount))
             {
-                // Check if using call.value() is successful
-                if (!msg.sender.call.value(amount)())
-                {
-                   event_withdrawalMadeFromBankAccount_Failed(accountNumber_, amount); 
-                   return false;
-                }
-                else
-                {
-                    event_withdrawalMadeFromBankAccount_Successful(accountNumber_, amount); 
-                    return true;
-                }
+ 	            withdrawalSuccessful_ = true;
             }
+            // Check if using call.value() is successful
+            else if (msg.sender.call.value(amount)())
+            {  
+                withdrawalSuccessful_ = true;
+            }  
             else
             {
-                event_withdrawalMadeFromBankAccount_Successful(accountNumber_, amount); 
-                return true;
+                // Set the previous balance
+                _bankAccountsArray[accountNumber_].balance += amount;
             }
-        }  
+        }
 
-        return false;
+        if (withdrawalSuccessful_)
+        {
+            event_withdrawalMadeFromBankAccount_Successful(accountNumber_, amount); 
+            return true;
+        }
+        else
+        {
+            event_withdrawalMadeFromBankAccount_Failed(accountNumber_, amount); 
+            return false;
+        }
     }
 
     function WithdrawFullBalanceFromBankAccount() public
@@ -301,39 +313,44 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        bool withdrawalSuccessful_ = false;
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Bank account has value that can be withdrawn?
         if (_bankAccountsArray[accountNumber_].balance > 0)
         {
-            uint256 fullBalance = _bankAccountsArray[accountNumber_].balance;
+            uint256 fullBalance_ = _bankAccountsArray[accountNumber_].balance;
 
             // Reduce the account balance 
             _bankAccountsArray[accountNumber_].balance = 0;
 
             // Check if using send() is successful
-            if (!msg.sender.send(fullBalance))
+            if (msg.sender.send(fullBalance_))
             {
-                // Check if using call.value() is successful
-                if (!msg.sender.call.value(fullBalance)())
-                {
-                    event_withdrawalMadeFromBankAccount_Failed(accountNumber_, fullBalance); 
-                    return false;
-                }
-                else
-                {
-                    event_withdrawalMadeFromBankAccount_Successful(accountNumber_, fullBalance); 
-                    return true;
-                }
+ 	            withdrawalSuccessful_ = true;
             }
+            // Check if using call.value() is successful
+            else if (msg.sender.call.value(fullBalance_)())
+            {  
+                withdrawalSuccessful_ = true;
+            }  
             else
             {
-                event_withdrawalMadeFromBankAccount_Successful(accountNumber_, fullBalance); 
-                return true;
+                // Set the previous balance
+                _bankAccountsArray[accountNumber_].balance = fullBalance_;
             }
         }  
 
-        return false;
+        if (withdrawalSuccessful_)
+        {
+            event_withdrawalMadeFromBankAccount_Successful(accountNumber_, fullBalance_); 
+            return true;
+        }
+        else
+        {
+            event_withdrawalMadeFromBankAccount_Failed(accountNumber_, fullBalance_); 
+            return false;
+        }
     }
 
     function TransferAmountFromBankAccountToAddress(uint256 amount, address destinationAddress) public
@@ -341,37 +358,42 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        bool transferSuccessful_ = false; 
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Bank account has value that can be transfered?
         if (amount > 0 && _bankAccountsArray[accountNumber_].balance >= amount)
         {
             // Reduce the account balance 
-            _bankAccountsArray[accountNumber_].balance -= amount;
+            _bankAccountsArray[accountNumber_].balance -= amount; 
 
             // Check if using send() is successful
-            if (!destinationAddress.send(amount))
+            if (destinationAddress.send(amount))
             {
-                // Check if using call.value() is successful
-                if (!destinationAddress.call.value(amount)())
-                {
-                    event_transferMadeFromBankAccountToAddress_Failed(accountNumber_, amount, destinationAddress); 
-                    return false;
-                }
-                else
-                {
-                    event_transferMadeFromBankAccountToAddress_Successful(accountNumber_, amount, destinationAddress); 
-                    return true;
-                }
+ 	            transferSuccessful_ = true;
             }
+            // Check if using call.value() is successful
+            else if (destinationAddress.call.value(amount)())
+            {  
+                transferSuccessful_ = true;
+            }  
             else
             {
-                event_transferMadeFromBankAccountToAddress_Successful(accountNumber_, amount, destinationAddress); 
-                return true;
+                // Set the previous balance
+                _bankAccountsArray[accountNumber_].balance += amount;
             }
         }  
 
-        return false;
+        if (transferSuccessful_)
+        {
+            event_transferMadeFromBankAccountToAddress_Successful(accountNumber_, amount, destinationAddress); 
+            return true;
+        }
+        else
+        {
+            event_transferMadeFromBankAccountToAddress_Failed(accountNumber_, amount, destinationAddress); 
+            return false;
+        }
     }
 
 
