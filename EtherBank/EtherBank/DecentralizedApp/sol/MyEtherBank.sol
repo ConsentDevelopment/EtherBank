@@ -13,6 +13,8 @@ contract MyEtherBank
         uint32 number; 
         address owner;      
         uint256 balance;
+
+        // Security - for connecting account to a new owner address
         bool passwordSha3HashSet;
         bytes32 passwordSha3Hash;   
     }   
@@ -443,8 +445,10 @@ contract MyEtherBank
             return false;        
         }
 
-        // Set new bank account address owner
+        // Set new bank account address owner and the update the owner address details 
         _bankAccountsArray[accountNumber].owner = msg.sender;
+        _bankAccountAddresses[msg.sender].accountSet = true;
+        _bankAccountAddresses[msg.sender].accountNumber = accountNumber;
 
         // Reset password sha3 hash
         _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
