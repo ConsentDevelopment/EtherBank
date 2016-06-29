@@ -4,31 +4,28 @@ contract MyEtherBank
 
     // Owner
     address _owner;
-    bool private _openNewBankAccountsEnabled;
     uint256 private _bankDonationsBalance;
-   
-    // Bank accounts      
-    struct BankAccountAddress
+    bool private _openNewBankAccountsEnabled;
+    bool private _connectBankAccountToNewOwnerAddressEnabled;
+
+    // Bank accounts    
+    struct BankAccount
     {
-        uint32 accountNumber;
-        address accountOwner;        
+        uint32 number; 
+        address owner;      
+        uint256 balance;
+        bytes32 passwordSha3Hash;   
     }   
 
-    struct BankAccount 
+    struct BankAccountAddress
     {
         bool accountSet;
-        uint32 accountNumber;
-        // address accountOwner;
-        // uint32 accountAddressIndex;
-        uint256 balance;
-        bytes32 passwordSha3Hash;
+        uint32 accountNumber; // accountNumber member is used to index the bank accounts array
     }
-
-    mapping(address => BankAccount) private _bankAccounts;
-    BankAccountAddress[] private _bankAccountsAddressArray; 
-
-    // Total bank accounts
+ 
     uint32 private _totalBankAccounts;
+    BankAccount[] private _bankAccountsArray; 
+    mapping(address => BankAccountAddress) private _bankAccountAddresses;  
 
 
     /* -------- Constructor -------- */
@@ -38,6 +35,7 @@ contract MyEtherBank
         // Set the contract owner
         _owner = msg.sender; 
         _openNewBankAccountsEnabled = true; 
+        _connectBankAccountToNewOwnerAddressEnabled = true;
         _bankDonationsBalance = 0; 
     }
 
@@ -57,9 +55,22 @@ contract MyEtherBank
     modifier modifier_doesSenderHaveABankAccount() 
     { 
         // Does this sender have a bank account?
-        if (_bankAccounts[msg.sender].accountSet == false)
+        if (_bankAccountAddresses[msg.sender].accountSet == false)
         {
             throw;
+        }
+        else
+        {
+            // Does the bank account owner address match the sender address?
+            uint32 accountNumber = _bankAccountAddresses[msg.sender].accountNumber;
+            address accountOwner = _bankAccountsArray[accountNumber].owner;
+            if (msg.sender != accountOwner) 
+            {
+                // This could occur if a bank account is connected to a new owner address and 
+                // the previous owner address tries to access the bank account
+                event_noBankAccountConnectedToAddress(msg.sender);
+                throw;        
+            }
         }
         _ 
     }
@@ -78,16 +89,22 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
+    event event_noBankAccountConnectedToAddress(address indexed senderAddress);
     event event_bankAccountOpened(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
+    event event_newBankAccountsAreDisabled();
     event event_depositMadeToBankAccount(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccountFromDifferentAddress(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
     event event_withdrawalMadeFromBankAccount(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_transferMadeFromBankAccountToAddress(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
 	event event_bankDonationsWithdrawn(uint256 donationsAmount);
+ 
+    // Security
+    event event_securityNewBankAccountsAreDisabled();
+    event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
 	event event_securityPasswordSha3HashAddedToBankAccount(uint32 indexed bankAccountNumber);
+    event event_securityBankAccountConnectedToNewAddressOwner(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
 
-
-    /* -------- Contract owner functions -------- */
+     /* -------- Contract owner functions -------- */
 
     function Donate(uint256 amount)
     {
@@ -135,64 +152,83 @@ contract MyEtherBank
         }
     }
 
+    function BankOwner_EnableConnectBankAccountToNewOwnerAddress()
+        modifier_isContractOwner()
+    { 
+        if (_connectBankAccountToNewOwnerAddressEnabled == false)
+        {
+            _connectBankAccountToNewOwnerAddressEnabled = true;
+        }
+    }
+
+    function  BankOwner_DisableConnectBankAccountToNewOwnerAddress()
+        modifier_isContractOwner()
+    { 
+        if (_connectBankAccountToNewOwnerAddressEnabled)
+        {
+            _connectBankAccountToNewOwnerAddressEnabled = false;
+        }
+    }
+
 
     /* -------- General bank functions -------- */
 
     // Open bank account
     function OpenBankAccount()
-        returns (uint32 accountNumberOut)
+        returns (uint32 newBankAccountNumber)
     {
         // Can new bank accounts be opened?
         if ( _openNewBankAccountsEnabled == false)
         {
+            event_newBankAccountsAreDisabled();
             throw;        
         }
 
         // Does this sender already have a bank account?
-        if (_bankAccounts[msg.sender].accountSet)
+        if (_bankAccountAddresses[msg.sender].accountSet)
         {
             throw;
         }
 
         // Assign the new bank account number
-        accountNumberOut = _totalBankAccounts;
+        newBankAccountNumber = _totalBankAccounts;
 
-        // Add new account to the array
-        _bankAccountsAddressArray.push( 
-            BankAccountAddress(
+        // Add new bank account to the array
+        _bankAccountsArray.push( 
+            BankAccount(
             {
-                accountNumber: accountNumberOut,
-                accountOwner: msg.sender
+                number: newBankAccountNumber,
+                owner: msg.sender,
+                balance: 0,
+                passwordSha3Hash: 0
             }
             ));
 
         // Add the new account
-        _bankAccounts[msg.sender].accountNumber = accountNumberOut;
-        _bankAccounts[msg.sender].accountSet = true;
-        // _bankAccounts[msg.sender].accountOwner = msg.sender;
+        _bankAccountAddresses[msg.sender].accountSet = true;
+        _bankAccountAddresses[msg.sender].accountNumber = newBankAccountNumber;
+
+        // Value sent?
+        if (msg.value > 0)
+        {    
+            _bankAccountsArray[newBankAccountNumber].balance += msg.value;
+        }
 
         // Move to the next bank account
         _totalBankAccounts++;
 
-        // Value sent?
-        if (msg.value > 0)
-        {
-            _bankAccounts[msg.sender].balance += msg.value;
-        }
-
         // Event
-        event_bankAccountOpened(msg.sender, accountNumberOut);
-
-        return accountNumberOut;
+        event_bankAccountOpened(msg.sender, newBankAccountNumber);
+        return newBankAccountNumber;
     }
 
     // Get account number from a existing account address
     function GetBankAccountNumber()       
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
-        returns (uint256)
+        returns (uint32)
     {
-	    return _bankAccounts[msg.sender].accountNumber;
+	    return _bankAccountAddresses[msg.sender].accountNumber;
     }
 
 
@@ -203,7 +239,8 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (uint256)
     {   
-        return _bankAccounts[msg.sender].balance;
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
+        return _bankAccountsArray[accountNumber_].balance;
     }
 
     function DepositToBankAccount()
@@ -213,8 +250,9 @@ contract MyEtherBank
         // Value sent?
         if (msg.value > 0)
         {
-            _bankAccounts[msg.sender].balance += msg.value; 
-            event_depositMadeToBankAccount(_bankAccounts[msg.sender].accountNumber, msg.value);
+            uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+            _bankAccountsArray[accountNumber_].balance += msg.value; 
+            event_depositMadeToBankAccount(accountNumber_, msg.value);
             return true;
         }
         else
@@ -226,7 +264,7 @@ contract MyEtherBank
     function DepositToBankAccountFromDifferentAddress(uint32 accountNumber)
         returns (bool)
     {
-        // Account valid
+        // Check if bank account number is valid
         if (accountNumber >= _totalBankAccounts)
         {
            return false;     
@@ -235,7 +273,7 @@ contract MyEtherBank
         // Value sent?
         if (msg.value > 0)
         {   
-            _bankAccounts[_bankAccountsAddressArray[accountNumber].accountOwner].balance += msg.value; 
+            _bankAccountsArray[accountNumber].balance += msg.value; 
             event_depositMadeToBankAccountFromDifferentAddress(msg.sender, msg.value, accountNumber);
             return true;
         }
@@ -250,11 +288,13 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+
         // Bank account has value that can be withdrawn?
-        if (amount > 0 && _bankAccounts[msg.sender].balance >= amount)
+        if (amount > 0 &&  _bankAccountsArray[accountNumber_].balance >= amount)
         {
             // Reduce the account balance 
-            _bankAccounts[msg.sender].balance -= amount;
+            _bankAccountsArray[accountNumber_].balance -= amount;
 
             // Check if using send() is successful
             if (!msg.sender.send(amount))
@@ -266,13 +306,13 @@ contract MyEtherBank
                 }
                 else
                 {
-                    event_withdrawalMadeFromBankAccount(_bankAccounts[msg.sender].accountNumber, amount); 
+                    event_withdrawalMadeFromBankAccount(accountNumber_, amount); 
                     return true;
                 }
             }
             else
             {
-                event_withdrawalMadeFromBankAccount(_bankAccounts[msg.sender].accountNumber, amount); 
+                event_withdrawalMadeFromBankAccount(accountNumber_, amount); 
                 return true;
             }
         }  
@@ -285,13 +325,15 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+
         // Bank account has value that can be withdrawn?
-        if (_bankAccounts[msg.sender].balance > 0)
+        if (_bankAccountsArray[accountNumber_].balance > 0)
         {
-            uint256 fullBalance = _bankAccounts[msg.sender].balance;
+            uint256 fullBalance = _bankAccountsArray[accountNumber_].balance;
 
             // Reduce the account balance 
-            _bankAccounts[msg.sender].balance = 0;
+            _bankAccountsArray[accountNumber_].balance = 0;
 
             // Check if using send() is successful
             if (!msg.sender.send(fullBalance))
@@ -303,13 +345,13 @@ contract MyEtherBank
                 }
                 else
                 {
-                    event_withdrawalMadeFromBankAccount(_bankAccounts[msg.sender].accountNumber, fullBalance); 
+                    event_withdrawalMadeFromBankAccount(accountNumber_, fullBalance); 
                     return true;
                 }
             }
             else
             {
-                event_withdrawalMadeFromBankAccount(_bankAccounts[msg.sender].accountNumber, fullBalance); 
+                event_withdrawalMadeFromBankAccount(accountNumber_, fullBalance); 
                 return true;
             }
         }  
@@ -322,11 +364,13 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+
         // Bank account has value that can be transfered?
-        if (amount > 0 && _bankAccounts[msg.sender].balance >= amount)
+        if (amount > 0 && _bankAccountsArray[accountNumber_].balance >= amount)
         {
             // Reduce the account balance 
-            _bankAccounts[msg.sender].balance -= amount;
+            _bankAccountsArray[accountNumber_].balance -= amount;
 
             // Check if using send() is successful
             if (!destinationAddress.send(amount))
@@ -338,13 +382,13 @@ contract MyEtherBank
                 }
                 else
                 {
-                    event_transferMadeFromBankAccountToAddress(_bankAccounts[msg.sender].accountNumber, amount, destinationAddress); 
+                    event_transferMadeFromBankAccountToAddress(accountNumber_, amount, destinationAddress); 
                     return true;
                 }
             }
             else
             {
-                event_transferMadeFromBankAccountToAddress(_bankAccounts[msg.sender].accountNumber, amount, destinationAddress); 
+                event_transferMadeFromBankAccountToAddress(accountNumber_, amount, destinationAddress); 
                 return true;
             }
         }  
@@ -355,23 +399,54 @@ contract MyEtherBank
 
     /* -------- Security functions -------- */
 
-    function Security_AddPasswordSha3HashToAccount(bytes32 sha3Hash)
+    function Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash)
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
     {
-        // Set the account password sha3 hash
-        _bankAccounts[msg.sender].passwordSha3Hash = sha3Hash;
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
-        event_securityPasswordSha3HashAddedToBankAccount(_bankAccounts[msg.sender].accountNumber);
+        // Set the account password sha3 hash
+        _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
+
+        event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
+    }
+
+    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, bytes32 password)
+        modifier_wasValueSent()
+        returns (bool)
+    {
+        // Can bank accounts be connected to a new owner address?
+        if (_connectBankAccountToNewOwnerAddressEnabled == false)
+        {
+            event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
+            return false;        
+        }
+
+        // Check if bank account number is valid
+        if (accountNumber >= _totalBankAccounts)
+        {
+           return false;     
+        }    
+
+        // Check the sha3 hash password
+        if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
+        {
+            return false;        
+        }
+
+        // Set new bank account address owner
+        _bankAccountsArray[accountNumber].owner = msg.sender;
+
+        // Reset password sha3 hash
+        _bankAccountsArray[accountNumber].passwordSha3Hash = 0;
+       
+        event_securityBankAccountConnectedToNewAddressOwner(accountNumber, msg.sender);
+        return true;
     }
 
 
+    /* -------- Default function -------- */
 
-
-
-
-
-    // Default function
     function() 
     {
         // If a address just sends a value or the wrong call data then just throw    
