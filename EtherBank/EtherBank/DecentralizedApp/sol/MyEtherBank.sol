@@ -60,9 +60,9 @@ contract MyEtherBank
         else
         {
             // Does the bank account owner address match the sender address?
-            uint32 accountNumber = _bankAccountAddresses[msg.sender].accountNumber;
-            address accountOwner = _bankAccountsArray[accountNumber].owner;
-            if (msg.sender != accountOwner) 
+            uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
+            address accountOwner_ = _bankAccountsArray[accountNumber_].owner;
+            if (msg.sender != accountOwner_) 
             {
                 throw;        
             }
@@ -448,8 +448,28 @@ contract MyEtherBank
     /* -------- Default function -------- */
 
     function() 
-    {
-        // If a address just sends a value or the wrong call data then just throw    
-        throw;
+    {    
+        // Does this sender have a bank account?
+        if (_bankAccountAddresses[msg.sender].accountSet)
+        {
+            // Does the bank account owner address match the sender address?
+            uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
+            address accountOwner_ = _bankAccountsArray[accountNumber_].owner;
+            if (msg.sender == accountOwner_) 
+            {
+                // Value sent?
+                if (msg.value > 0)
+                {    
+                    // Update the bank account balance
+                    _bankAccountsArray[accountNumber_].balance += msg.value;
+                    event_depositMadeToBankAccount_Successful(msg.value, accountNumber_);
+                }
+            }
+        }
+        else
+        {
+            // Open a new bank account for the sender address - this function will also add any value sent to the bank account balance
+            OpenBankAccount();
+        }
     }
 } 
