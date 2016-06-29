@@ -13,6 +13,7 @@ contract MyEtherBank
         uint32 number; 
         address owner;      
         uint256 balance;
+        bool passwordSha3HashSet;
         bytes32 passwordSha3Hash;   
     }   
 
@@ -179,6 +180,7 @@ contract MyEtherBank
                 number: newBankAccountNumber,
                 owner: msg.sender,
                 balance: 0,
+                passwordSha3HashSet: false,
                 passwordSha3Hash: "0"
             }
             ));
@@ -406,6 +408,7 @@ contract MyEtherBank
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Set the account password sha3 hash
+        _bankAccountsArray[accountNumber_].passwordSha3HashSet = true;
         _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
 
         event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
@@ -428,6 +431,12 @@ contract MyEtherBank
            return false;     
         }    
 
+        // Has password sha3 hash been set?
+        if (_bankAccountsArray[accountNumber].passwordSha3HashSet == false)
+        {
+            return false;           
+        }
+
         // Check the password sha3 hash matches
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
@@ -438,6 +447,7 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber].owner = msg.sender;
 
         // Reset password sha3 hash
+        _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
         _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
        
         event_securityBankAccountConnectedToNewAddressOwner(accountNumber, msg.sender);
