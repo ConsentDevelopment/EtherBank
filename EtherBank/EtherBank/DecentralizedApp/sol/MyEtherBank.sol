@@ -439,7 +439,13 @@ contract MyEtherBank
             return false;           
         }
 
-        // Check the password sha3 hash matches
+        // Check the password sha3 hash matches.
+        // VERY IMPORTANT -
+        // 
+        // Ethereum uses KECCAK-256. It should be noted that it does not follow the FIPS-202 based standard (a.k.a SHA-3), 
+        // which was finalized in August 2015.
+        // 
+        // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             return false;        
