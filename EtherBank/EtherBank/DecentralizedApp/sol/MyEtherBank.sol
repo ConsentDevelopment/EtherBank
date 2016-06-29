@@ -44,7 +44,7 @@ contract MyEtherBank
 
     modifier modifier_isContractOwner()
     { 
-        // Value sent?
+        // Contact owner?
         if (msg.sender != _owner)
         {
             throw;       
@@ -66,9 +66,6 @@ contract MyEtherBank
             address accountOwner = _bankAccountsArray[accountNumber].owner;
             if (msg.sender != accountOwner) 
             {
-                // This could occur if a bank account is connected to a new owner address and 
-                // the previous owner address tries to access the bank account
-                event_noBankAccountConnectedToAddress(msg.sender);
                 throw;        
             }
         }
@@ -89,17 +86,18 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
-    event event_noBankAccountConnectedToAddress(address indexed senderAddress);
-    event event_bankAccountOpened(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
-    event event_newBankAccountsAreDisabled();
-    event event_depositMadeToBankAccount(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
-    event event_depositMadeToBankAccountFromDifferentAddress(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
-    event event_withdrawalMadeFromBankAccount(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
-    event event_transferMadeFromBankAccountToAddress(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
+    event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
+    event event_depositMadeToBankAccount_Successful(uint256 indexed depositAmount, uint32 indexed bankAccountNumber); 
+    event event_depositMadeToBankAccount_Failed(uint256 indexed depositAmount, uint32 indexed bankAccountNumber); 
+    event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
+    event event_depositMadeToBankAccountFromDifferentAddress_Failed(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
+    event event_withdrawalMadeFromBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
+    event event_withdrawalMadeFromBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
+    event event_transferMadeFromBankAccountToAddress_Successful(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
+    event event_transferMadeFromBankAccountToAddress_Failed(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
 	event event_bankDonationsWithdrawn(uint256 donationsAmount);
  
     // Security
-    event event_securityNewBankAccountsAreDisabled();
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
 	event event_securityPasswordSha3HashAddedToBankAccount(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
@@ -116,6 +114,7 @@ contract MyEtherBank
 
     function BankOwner_WithdrawDonations(address destinationAddress)
         modifier_isContractOwner()
+        modifier_wasValueSent()
     { 
         if (_bankDonationsBalance > 0)
         {
@@ -178,13 +177,12 @@ contract MyEtherBank
         returns (uint32 newBankAccountNumber)
     {
         // Can new bank accounts be opened?
-        if ( _openNewBankAccountsEnabled == false)
+        if (_openNewBankAccountsEnabled == false)
         {
-            event_newBankAccountsAreDisabled();
             throw;        
         }
 
-        // Does this sender already have a bank account?
+        // Does this sender already have a bank account or a previously used address for a bank account?
         if (_bankAccountAddresses[msg.sender].accountSet)
         {
             throw;
@@ -200,7 +198,7 @@ contract MyEtherBank
                 number: newBankAccountNumber,
                 owner: msg.sender,
                 balance: 0,
-                passwordSha3Hash: 0
+                passwordSha3Hash: "0"
             }
             ));
 
@@ -218,7 +216,7 @@ contract MyEtherBank
         _totalBankAccounts++;
 
         // Event
-        event_bankAccountOpened(msg.sender, newBankAccountNumber);
+        event_bankAccountOpened_Successful(msg.sender, newBankAccountNumber);
         return newBankAccountNumber;
     }
 
@@ -252,11 +250,12 @@ contract MyEtherBank
         {
             uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
             _bankAccountsArray[accountNumber_].balance += msg.value; 
-            event_depositMadeToBankAccount(accountNumber_, msg.value);
+            event_depositMadeToBankAccount_Successful(msg.value, accountNumber_);
             return true;
         }
         else
         {
+            event_depositMadeToBankAccount_Failed(msg.value, accountNumber_);
             return false;
         }
     }
@@ -274,11 +273,12 @@ contract MyEtherBank
         if (msg.value > 0)
         {   
             _bankAccountsArray[accountNumber].balance += msg.value; 
-            event_depositMadeToBankAccountFromDifferentAddress(msg.sender, msg.value, accountNumber);
+            event_depositMadeToBankAccountFromDifferentAddress_Successful(msg.sender, msg.value, accountNumber);
             return true;
         }
         else
         {
+            event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, msg.value, accountNumber);
             return false;
         }
     }
@@ -302,17 +302,18 @@ contract MyEtherBank
                 // Check if using call.value() is successful
                 if (!msg.sender.call.value(amount)())
                 {
-                    throw;
+                   event_withdrawalMadeFromBankAccount_Failed(accountNumber_, amount); 
+                   return false;
                 }
                 else
                 {
-                    event_withdrawalMadeFromBankAccount(accountNumber_, amount); 
+                    event_withdrawalMadeFromBankAccount_Successful(accountNumber_, amount); 
                     return true;
                 }
             }
             else
             {
-                event_withdrawalMadeFromBankAccount(accountNumber_, amount); 
+                event_withdrawalMadeFromBankAccount_Successful(accountNumber_, amount); 
                 return true;
             }
         }  
@@ -341,17 +342,18 @@ contract MyEtherBank
                 // Check if using call.value() is successful
                 if (!msg.sender.call.value(fullBalance)())
                 {
-                    throw;
+                    event_withdrawalMadeFromBankAccount_Failed(accountNumber_, fullBalance); 
+                    return false;
                 }
                 else
                 {
-                    event_withdrawalMadeFromBankAccount(accountNumber_, fullBalance); 
+                    event_withdrawalMadeFromBankAccount_Successful(accountNumber_, fullBalance); 
                     return true;
                 }
             }
             else
             {
-                event_withdrawalMadeFromBankAccount(accountNumber_, fullBalance); 
+                event_withdrawalMadeFromBankAccount_Successful(accountNumber_, fullBalance); 
                 return true;
             }
         }  
@@ -378,17 +380,18 @@ contract MyEtherBank
                 // Check if using call.value() is successful
                 if (!destinationAddress.call.value(amount)())
                 {
-                    throw;
+                    event_transferMadeFromBankAccountToAddress_Failed(accountNumber_, amount, destinationAddress); 
+                    return false;
                 }
                 else
                 {
-                    event_transferMadeFromBankAccountToAddress(accountNumber_, amount, destinationAddress); 
+                    event_transferMadeFromBankAccountToAddress_Successful(accountNumber_, amount, destinationAddress); 
                     return true;
                 }
             }
             else
             {
-                event_transferMadeFromBankAccountToAddress(accountNumber_, amount, destinationAddress); 
+                event_transferMadeFromBankAccountToAddress_Successful(accountNumber_, amount, destinationAddress); 
                 return true;
             }
         }  
@@ -428,7 +431,7 @@ contract MyEtherBank
            return false;     
         }    
 
-        // Check the sha3 hash password
+        // Check the password sha3 hash matches
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             return false;        
@@ -438,7 +441,7 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber].owner = msg.sender;
 
         // Reset password sha3 hash
-        _bankAccountsArray[accountNumber].passwordSha3Hash = 0;
+        _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
        
         event_securityBankAccountConnectedToNewAddressOwner(accountNumber, msg.sender);
         return true;
