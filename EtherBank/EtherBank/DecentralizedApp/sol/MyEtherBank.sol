@@ -3,9 +3,8 @@ contract MyEtherBank
     /* -------- State data -------- */
 
     // Owner
-    address _owner;
+    address private _owner;
     uint256 private _bankDonationsBalance;
-    bool private _openNewBankAccountsEnabled;
     bool private _connectBankAccountToNewOwnerAddressEnabled;
 
     // Bank accounts    
@@ -30,11 +29,10 @@ contract MyEtherBank
 
     /* -------- Constructor -------- */
 
-    function MyEtherBank()
+    function MyEtherBank() public
     {
         // Set the contract owner
         _owner = msg.sender; 
-        _openNewBankAccountsEnabled = true; 
         _connectBankAccountToNewOwnerAddressEnabled = true;
         _bankDonationsBalance = 0; 
     }
@@ -102,17 +100,18 @@ contract MyEtherBank
 	event event_securityPasswordSha3HashAddedToBankAccount(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
 
-     /* -------- Contract owner functions -------- */
 
-    function Donate(uint256 amount)
+    /* -------- Contract owner functions -------- */
+
+    function Donate() public
     {
-        if (amount > 0)
+        if (msg.value > 0)
         {
-            _bankDonationsBalance += amount;
+            _bankDonationsBalance += msg.value;
         }
     }
 
-    function BankOwner_WithdrawDonations(address destinationAddress)
+    function BankOwner_WithdrawDonations(address destinationAddress) public
         modifier_isContractOwner()
         modifier_wasValueSent()
     { 
@@ -133,25 +132,7 @@ contract MyEtherBank
         }
     }
 
-    function BankOwner_EnableNewBankAccountsToBeAdded()
-        modifier_isContractOwner()
-    { 
-        if (_openNewBankAccountsEnabled == false)
-        {
-            _openNewBankAccountsEnabled = true;
-        }
-    }
-
-    function BankOwner_DisableNewBankAccountsToBeAdded()
-        modifier_isContractOwner()
-    { 
-        if (_openNewBankAccountsEnabled)
-        {
-            _openNewBankAccountsEnabled = false;
-        }
-    }
-
-    function BankOwner_EnableConnectBankAccountToNewOwnerAddress()
+    function BankOwner_EnableConnectBankAccountToNewOwnerAddress() public
         modifier_isContractOwner()
     { 
         if (_connectBankAccountToNewOwnerAddressEnabled == false)
@@ -160,7 +141,7 @@ contract MyEtherBank
         }
     }
 
-    function  BankOwner_DisableConnectBankAccountToNewOwnerAddress()
+    function  BankOwner_DisableConnectBankAccountToNewOwnerAddress() public
         modifier_isContractOwner()
     { 
         if (_connectBankAccountToNewOwnerAddressEnabled)
@@ -173,15 +154,9 @@ contract MyEtherBank
     /* -------- General bank functions -------- */
 
     // Open bank account
-    function OpenBankAccount()
-        returns (uint32 newBankAccountNumber)
+    function OpenBankAccount() public
+        returns (uint32 newBankAccountNumber) 
     {
-        // Can new bank accounts be opened?
-        if (_openNewBankAccountsEnabled == false)
-        {
-            throw;        
-        }
-
         // Does this sender already have a bank account or a previously used address for a bank account?
         if (_bankAccountAddresses[msg.sender].accountSet)
         {
@@ -221,7 +196,7 @@ contract MyEtherBank
     }
 
     // Get account number from a existing account address
-    function GetBankAccountNumber()       
+    function GetBankAccountNumber() public      
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint32)
@@ -232,7 +207,7 @@ contract MyEtherBank
 
     /* -------- Account functions -------- */
 
-    function GetBankAccountBalance()
+    function GetBankAccountBalance() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint256)
@@ -241,7 +216,7 @@ contract MyEtherBank
         return _bankAccountsArray[accountNumber_].balance;
     }
 
-    function DepositToBankAccount()
+    function DepositToBankAccount() public
         modifier_doesSenderHaveABankAccount()
         returns (bool)
     {
@@ -260,7 +235,7 @@ contract MyEtherBank
         }
     }
 
-    function DepositToBankAccountFromDifferentAddress(uint32 accountNumber)
+    function DepositToBankAccountFromDifferentAddress(uint32 accountNumber) public
         returns (bool)
     {
         // Check if bank account number is valid
@@ -283,7 +258,7 @@ contract MyEtherBank
         }
     }
     
-    function WithdrawAmountFromBankAccount(uint32 amount)
+    function WithdrawAmountFromBankAccount(uint32 amount) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (bool)
@@ -321,7 +296,7 @@ contract MyEtherBank
         return false;
     }
 
-    function WithdrawFullBalanceFromBankAccount()
+    function WithdrawFullBalanceFromBankAccount() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (bool)
@@ -361,7 +336,7 @@ contract MyEtherBank
         return false;
     }
 
-    function TransferAmountFromBankAccountToAddress(uint256 amount, address destinationAddress)
+    function TransferAmountFromBankAccountToAddress(uint256 amount, address destinationAddress) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (bool)
@@ -402,7 +377,7 @@ contract MyEtherBank
 
     /* -------- Security functions -------- */
 
-    function Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash)
+    function Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
     {
