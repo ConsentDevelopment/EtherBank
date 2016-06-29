@@ -2,11 +2,12 @@ contract MyEtherBank
 {
     /* -------- State data -------- */
 
+    // Owner
     address _owner;
     bool private _openNewBankAccountsEnabled;
     uint256 private _bankDonationsBalance;
    
-    // Account      
+    // Bank accounts      
     struct BankAccountAddress
     {
         uint32 accountNumber;
@@ -17,12 +18,12 @@ contract MyEtherBank
     {
         bool accountSet;
         uint32 accountNumber;
-            address accountOwner;
+        // address accountOwner;
+        // uint32 accountAddressIndex;
         uint256 balance;
         bytes32 passwordSha3Hash;
     }
 
-    // Account owners
     mapping(address => BankAccount) private _bankAccounts;
     BankAccountAddress[] private _bankAccountsAddressArray; 
 
@@ -77,12 +78,13 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
-    event event_bankAccountOpened(address indexed bankAccountOwner, uint256 indexed bankAccountNumber);
-    event event_depositMadeToBankAccount(uint256 indexed bankAccountNumber, uint256 indexed depositAmount); 
-    event event_withdrawalMadeFromBankAccount(uint256 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
-    event event_transferMadeFromBankAccountToAddress(uint256 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
+    event event_bankAccountOpened(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
+    event event_depositMadeToBankAccount(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
+    event event_depositMadeToBankAccountFromDifferentAddress(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
+    event event_withdrawalMadeFromBankAccount(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
+    event event_transferMadeFromBankAccountToAddress(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
 	event event_bankDonationsWithdrawn(uint256 donationsAmount);
-	event event_securityPasswordHashAddedToBankAccount(uint256 indexed bankAccountNumber);
+	event event_securityPasswordSha3HashAddedToBankAccount(uint32 indexed bankAccountNumber);
 
 
     /* -------- Contract owner functions -------- */
@@ -134,17 +136,13 @@ contract MyEtherBank
     }
 
 
-
-
-
-
     /* -------- General bank functions -------- */
 
     // Open bank account
     function OpenBankAccount()
-        returns (uint32 accountNumber)
+        returns (uint32 accountNumberOut)
     {
-        // Can new bankaccounts be openned?
+        // Can new bank accounts be opened?
         if ( _openNewBankAccountsEnabled == false)
         {
             throw;        
@@ -157,20 +155,21 @@ contract MyEtherBank
         }
 
         // Assign the new bank account number
-        accountNumber = _totalBankAccounts;
+        accountNumberOut = _totalBankAccounts;
 
         // Add new account to the array
-        _bankAccountsAddressArray.push( BankAccountAddress(
+        _bankAccountsAddressArray.push( 
+            BankAccountAddress(
             {
-                accountNumber: accountNumber,
+                accountNumber: accountNumberOut,
                 accountOwner: msg.sender
             }
             ));
 
         // Add the new account
-        _bankAccounts[msg.sender].accountNumber = accountNumber;
+        _bankAccounts[msg.sender].accountNumber = accountNumberOut;
         _bankAccounts[msg.sender].accountSet = true;
-        _bankAccounts[msg.sender].accountOwner = msg.sender;
+        // _bankAccounts[msg.sender].accountOwner = msg.sender;
 
         // Move to the next bank account
         _totalBankAccounts++;
@@ -182,9 +181,9 @@ contract MyEtherBank
         }
 
         // Event
-        event_bankAccountOpened(msg.sender, accountNumber);
+        event_bankAccountOpened(msg.sender, accountNumberOut);
 
-        return accountNumber;
+        return accountNumberOut;
     }
 
     // Get account number from a existing account address
@@ -209,18 +208,12 @@ contract MyEtherBank
 
     function DepositToBankAccount()
         modifier_doesSenderHaveABankAccount()
-        returns (bool depositSuccessful)
+        returns (bool)
     {
         // Value sent?
         if (msg.value > 0)
         {
             _bankAccounts[msg.sender].balance += msg.value; 
-            depositSuccessful = true;
-        }
-            
-        // Event
-        if (depositSuccessful)
-        { 
             event_depositMadeToBankAccount(_bankAccounts[msg.sender].accountNumber, msg.value);
             return true;
         }
@@ -230,6 +223,28 @@ contract MyEtherBank
         }
     }
 
+    function DepositToBankAccountFromDifferentAddress(uint32 accountNumber)
+        returns (bool)
+    {
+        // Account valid
+        if (accountNumber >= _totalBankAccounts)
+        {
+           return false;     
+        }    
+            
+        // Value sent?
+        if (msg.value > 0)
+        {   
+            _bankAccounts[_bankAccountsAddressArray[accountNumber].accountOwner].balance += msg.value; 
+            event_depositMadeToBankAccountFromDifferentAddress(msg.sender, msg.value, accountNumber);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
     function WithdrawAmountFromBankAccount(uint32 amount)
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
@@ -338,23 +353,19 @@ contract MyEtherBank
     }
 
 
-    /* -------- security functions -------- */
+    /* -------- Security functions -------- */
 
-    function Security_AddPasswordSha3HashToAccount(bytes32 hash)
+    function Security_AddPasswordSha3HashToAccount(bytes32 sha3Hash)
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
-        returns (bool)
     {
-        
+        // Set the account password sha3 hash
+        _bankAccounts[msg.sender].passwordSha3Hash = sha3Hash;
 
-
-
-        // Set the account password hash
-        _bankAccounts[msg.sender].passwordSha3Hash = hash;
-
-        event_securityPasswordHashAddedToBankAccount(_bankAccounts[msg.sender].accountNumber);
-        return true;
+        event_securityPasswordSha3HashAddedToBankAccount(_bankAccounts[msg.sender].accountNumber);
     }
+
+
 
 
 
