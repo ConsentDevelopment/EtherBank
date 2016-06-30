@@ -26,7 +26,8 @@ contract MyEtherBank
 
     */
 
-    // Contact email - consentdev@gmail.com 
+    // Author : Alex Darby 
+    // Contact email : consentdev@gmail.com 
     // Version : 1.0 - initial release
 
     /* -------- State data -------- */
