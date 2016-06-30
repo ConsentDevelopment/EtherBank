@@ -10,13 +10,13 @@ contract MyEtherBank
     // Bank accounts    
     struct BankAccount
     {
-        uint32 number; 
-        address owner;      
-        uint256 balance;
-
-        // Security - for connecting account to a new owner address
+        // Members placed in order for optimization, not readability
         bool passwordSha3HashSet;
+        uint32 number; 
+        uint256 balance;
+        address owner;       
         bytes32 passwordSha3Hash;   
+        mapping(bytes32 => bool) passwordsSha3HashesUsed;
     }   
 
     struct BankAccountAddress
@@ -179,13 +179,19 @@ contract MyEtherBank
         _bankAccountsArray.push( 
             BankAccount(
             {
-                number: newBankAccountNumber,
-                owner: msg.sender,
-                balance: 0,
                 passwordSha3HashSet: false,
-                passwordSha3Hash: "0"
+                number: newBankAccountNumber,
+                balance: 0,
+                owner: msg.sender,
+                passwordSha3Hash: "0",
             }
             ));
+
+        // Prevent people using "password" or "Password" sha3 hash for the Security_AddPasswordSha3HashToBankAccount() function
+        bytes32 passwordHash = sha3("password");
+        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash] = true;
+        passwordHash = sha3("Password");
+        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash] = true;
 
         // Add the new account
         _bankAccountAddresses[msg.sender].accountSet = true;
@@ -205,7 +211,7 @@ contract MyEtherBank
         return newBankAccountNumber;
     }
 
-    // Get account number from a existing account address
+    // Get account number from a owner address
     function GetBankAccountNumber() public      
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
@@ -409,9 +415,16 @@ contract MyEtherBank
     {
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
+        // Has this password hash been used before for this account?
+        if (_bankAccountsArray[accountNumber_].passwordsSha3HashesUsed[sha3Hash] == true)
+        {
+            return;        
+        }
+
         // Set the account password sha3 hash
         _bankAccountsArray[accountNumber_].passwordSha3HashSet = true;
         _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
+        _bankAccountsArray[accountNumber_].passwordsSha3HashesUsed[sha3Hash] = true;
 
         event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
     }
