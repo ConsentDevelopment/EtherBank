@@ -188,10 +188,10 @@ contract MyEtherBank
             ));
 
         // Prevent people using "password" or "Password" sha3 hash for the Security_AddPasswordSha3HashToBankAccount() function
-        bytes32 passwordHash = sha3("password");
-        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash] = true;
-        passwordHash = sha3("Password");
-        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash] = true;
+        bytes32 passwordHash_ = sha3("password");
+        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash_] = true;
+        passwordHash_ = sha3("Password");
+        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash_] = true;
 
         // Add the new account
         _bankAccountAddresses[msg.sender].accountSet = true;
