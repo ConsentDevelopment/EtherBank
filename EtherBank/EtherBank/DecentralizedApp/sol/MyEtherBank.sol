@@ -117,7 +117,7 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
-    event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
+    event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
     event event_depositMadeToBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
@@ -237,7 +237,7 @@ contract MyEtherBank
         _totalBankAccounts++;
 
         // Event
-        event_bankAccountOpened_Successful(msg.sender, newBankAccountNumber);
+        event_bankAccountOpened_Successful(msg.sender, newBankAccountNumber, msg.value);
         return newBankAccountNumber;
     }
 
