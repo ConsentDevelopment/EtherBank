@@ -431,7 +431,7 @@ contract MyEtherBank
         event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
     }
 
-    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, bytes32 password)
+    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, bytes32 password) public
         modifier_wasValueSent()
         returns (bool)
     {
