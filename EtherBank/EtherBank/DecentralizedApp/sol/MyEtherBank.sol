@@ -32,8 +32,8 @@ contract MyEtherBank
 
     // Owner
     address private _owner;
-    uint256 private _bankDonationsBalance;
-    bool private _connectBankAccountToNewOwnerAddressEnabled;
+    uint256 private _bankDonationsBalance = 0;
+    bool private _connectBankAccountToNewOwnerAddressEnabled = true;
 
     // Bank accounts    
     struct BankAccount
@@ -53,7 +53,7 @@ contract MyEtherBank
         uint32 accountNumber; // accountNumber member is used to index the bank accounts array
     }
  
-    uint32 private _totalBankAccounts;
+    uint32 private _totalBankAccounts = 0;
     BankAccount[] private _bankAccountsArray; 
     mapping(address => BankAccountAddress) private _bankAccountAddresses;  
 
