@@ -1,5 +1,7 @@
 contract MyEtherBank 
 {
+    /* Contact email - consentdev@gmail.com */
+
     /* LICENSE :
 
     MIT License
