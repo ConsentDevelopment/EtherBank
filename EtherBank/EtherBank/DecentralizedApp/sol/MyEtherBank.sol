@@ -1,5 +1,7 @@
 contract MyEtherBank 
 {
+    // Version : 1.0 - initial release
+
     /* -------- State data -------- */
 
     // Owner
@@ -16,7 +18,7 @@ contract MyEtherBank
         uint256 balance;
         address owner;       
         bytes32 passwordSha3Hash;   
-        mapping(bytes32 => bool) passwordsSha3HashesUsed;
+        mapping(bytes32 => bool) passwordSha3HashesUsed;
     }   
 
     struct BankAccountAddress
@@ -189,9 +191,9 @@ contract MyEtherBank
 
         // Prevent people using "password" or "Password" sha3 hash for the Security_AddPasswordSha3HashToBankAccount() function
         bytes32 passwordHash_ = sha3("password");
-        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash_] = true;
+        _bankAccountsArray[newBankAccountNumber].passwordSha3HashesUsed[passwordHash_] = true;
         passwordHash_ = sha3("Password");
-        _bankAccountsArray[newBankAccountNumber].passwordsSha3HashesUsed[passwordHash_] = true;
+        _bankAccountsArray[newBankAccountNumber].passwordSha3HashesUsed[passwordHash_] = true;
 
         // Add the new account
         _bankAccountAddresses[msg.sender].accountSet = true;
@@ -416,7 +418,7 @@ contract MyEtherBank
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
-        if (_bankAccountsArray[accountNumber_].passwordsSha3HashesUsed[sha3Hash] == true)
+        if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
             return;        
         }
@@ -424,7 +426,7 @@ contract MyEtherBank
         // Set the account password sha3 hash
         _bankAccountsArray[accountNumber_].passwordSha3HashSet = true;
         _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
-        _bankAccountsArray[accountNumber_].passwordsSha3HashesUsed[sha3Hash] = true;
+        _bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] = true;
 
         event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
     }
