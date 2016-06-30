@@ -502,8 +502,6 @@ contract MyEtherBank
         if (_bankAccountAddresses[msg.sender].accountSet)
         {
             // A owner address can only have one bank account
-            event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
-
             return false;
         }
 
