@@ -116,10 +116,10 @@ contract MyEtherBank
     /* -------- Events -------- */
 
     event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
-    event event_depositMadeToBankAccount_Successful(uint256 indexed depositAmount, uint32 indexed bankAccountNumber); 
-    event event_depositMadeToBankAccount_Failed(uint256 indexed depositAmount, uint32 indexed bankAccountNumber); 
-    event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
-    event event_depositMadeToBankAccountFromDifferentAddress_Failed(address indexed addressFrom, uint256 indexed depositAmount, uint32 indexed bankAccountNumber);
+    event event_depositMadeToBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
+    event event_depositMadeToBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
+    event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
+    event event_depositMadeToBankAccountFromDifferentAddress_Failed(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
     event event_withdrawalMadeFromBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_withdrawalMadeFromBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_transferMadeFromBankAccountToAddress_Successful(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount, address indexed destinationAddress); 
@@ -269,12 +269,12 @@ contract MyEtherBank
         {
             uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
             _bankAccountsArray[accountNumber_].balance += msg.value; 
-            event_depositMadeToBankAccount_Successful(msg.value, accountNumber_);
+            event_depositMadeToBankAccount_Successful(accountNumber_, msg.value);
             return true;
         }
         else
         {
-            event_depositMadeToBankAccount_Failed(msg.value, accountNumber_);
+            event_depositMadeToBankAccount_Failed(accountNumber_, msg.value);
             return false;
         }
     }
@@ -285,7 +285,7 @@ contract MyEtherBank
         // Check if bank account number is valid
         if (accountNumber >= _totalBankAccounts)
         {
-           event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, msg.value, accountNumber);
+           event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, accountNumber, msg.value);
            return false;     
         }    
             
@@ -293,12 +293,12 @@ contract MyEtherBank
         if (msg.value > 0)
         {   
             _bankAccountsArray[accountNumber].balance += msg.value; 
-            event_depositMadeToBankAccountFromDifferentAddress_Successful(msg.sender, msg.value, accountNumber);
+            event_depositMadeToBankAccountFromDifferentAddress_Successful(msg.sender, accountNumber, msg.value);
             return true;
         }
         else
         {
-            event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, msg.value, accountNumber);
+            event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, accountNumber, msg.value);
             return false;
         }
     }
@@ -523,7 +523,7 @@ contract MyEtherBank
                 {    
                     // Update the bank account balance
                     _bankAccountsArray[accountNumber_].balance += msg.value;
-                    event_depositMadeToBankAccount_Successful(msg.value, accountNumber_);
+                    event_depositMadeToBankAccount_Successful(accountNumber_, msg.value);
                 }
             }
         }
