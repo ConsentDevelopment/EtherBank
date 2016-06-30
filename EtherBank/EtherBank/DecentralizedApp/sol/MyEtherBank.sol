@@ -217,7 +217,7 @@ contract MyEtherBank
     function GetBankAccountNumber() public      
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
-        returns (uint32)
+        constant returns (uint32)
     {
 	    return _bankAccountAddresses[msg.sender].accountNumber;
     }
@@ -228,7 +228,7 @@ contract MyEtherBank
     function GetBankAccountBalance() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
-        returns (uint256)
+        constant returns (uint256)
     {   
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
         return _bankAccountsArray[accountNumber_].balance;
