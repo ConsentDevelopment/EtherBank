@@ -118,6 +118,8 @@ contract MyEtherBank
     /* -------- Events -------- */
 
     event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
+    event event_getBankAccountNumber_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
+    event event_getBankAccountBalance_Successful(address indexed bankAccountOwner,  uint32 indexed bankAccountNumber, uint256 indexed balance);
     event event_depositMadeToBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
@@ -130,8 +132,8 @@ contract MyEtherBank
  
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
-	event event_securityPasswordSha3HashAddedToBankAccount(uint32 indexed bankAccountNumber);
-    event event_securityBankAccountConnectedToNewAddressOwner(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
+	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
+    event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
 
 
     /* -------- Contract owner functions -------- */
@@ -247,6 +249,7 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (uint32)
     {
+        event_getBankAccountNumber_Successful(msg.sender, _bankAccountAddresses[msg.sender].accountNumber);
 	    return _bankAccountAddresses[msg.sender].accountNumber;
     }
 
@@ -259,6 +262,7 @@ contract MyEtherBank
         returns (uint256)
     {   
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
+        event_getBankAccountBalance_Successful(msg.sender, accountNumber_, _bankAccountsArray[accountNumber_].balance);
         return _bankAccountsArray[accountNumber_].balance;
     }
 
@@ -456,7 +460,7 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
         _bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] = true;
 
-        event_securityPasswordSha3HashAddedToBankAccount(accountNumber_);
+        event_securityPasswordSha3HashAddedToBankAccount_Successful(accountNumber_);
     }
 
     function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, bytes32 password) public
@@ -494,6 +498,15 @@ contract MyEtherBank
             return false;        
         }
 
+        // Does the sender already have a bank account?
+        if (_bankAccountAddresses[msg.sender].accountSet)
+        {
+            // A owner address can only have one bank account
+            event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
+
+            return false;
+        }
+
         // Set new bank account address owner and the update the owner address details 
         _bankAccountsArray[accountNumber].owner = msg.sender;
         _bankAccountAddresses[msg.sender].accountSet = true;
@@ -503,7 +516,7 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
         _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
        
-        event_securityBankAccountConnectedToNewAddressOwner(accountNumber, msg.sender);
+        event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
         return true;
     }
 
