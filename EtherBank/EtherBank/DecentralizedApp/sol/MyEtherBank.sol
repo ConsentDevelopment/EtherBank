@@ -94,8 +94,7 @@ contract MyEtherBank
         {
             // Does the bank account owner address match the sender address?
             uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
-            address accountOwner_ = _bankAccountsArray[accountNumber_].owner;
-            if (msg.sender != accountOwner_) 
+            if (msg.sender != _bankAccountsArray[accountNumber_].owner )
             {
                 throw;        
             }
