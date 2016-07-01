@@ -484,6 +484,13 @@ contract MyEtherBank
            return false;     
         }    
 
+        // Does the sender already have a bank account?
+        if (_bankAccountAddresses[msg.sender].accountSet)
+        {
+            // A owner address can only have one bank account
+            return false;
+        }
+
         // Has password sha3 hash been set?
         if (_bankAccountsArray[accountNumber].passwordSha3HashSet == false)
         {
@@ -500,13 +507,6 @@ contract MyEtherBank
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             return false;        
-        }
-
-        // Does the sender already have a bank account?
-        if (_bankAccountAddresses[msg.sender].accountSet)
-        {
-            // A owner address can only have one bank account
-            return false;
         }
 
         // Set new bank account address owner and the update the owner address details 
