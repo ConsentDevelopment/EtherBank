@@ -193,7 +193,7 @@ contract MyEtherBank
     }
 
 
-    /* -------- General bank functions -------- */
+    /* -------- General bank account functions -------- */
 
     // Open bank account
     function OpenBankAccount() public
@@ -254,9 +254,6 @@ contract MyEtherBank
 	    return _bankAccountAddresses[msg.sender].accountNumber;
     }
 
-
-    /* -------- Account functions -------- */
-
     function GetBankAccountBalance() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
@@ -266,6 +263,9 @@ contract MyEtherBank
         event_getBankAccountBalance_Successful(msg.sender, accountNumber_, _bankAccountsArray[accountNumber_].balance);
         return _bankAccountsArray[accountNumber_].balance;
     }
+
+
+    /* -------- Deposit functions -------- */
 
     function DepositToBankAccount() public
         modifier_doesSenderHaveABankAccount()
@@ -310,6 +310,9 @@ contract MyEtherBank
         }
     }
     
+
+    /* -------- Withdrawal / transform functions -------- */
+
     function WithdrawAmountFromBankAccount(uint256 amount) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
