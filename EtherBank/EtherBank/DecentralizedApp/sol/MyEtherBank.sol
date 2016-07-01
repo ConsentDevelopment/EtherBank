@@ -244,7 +244,7 @@ contract MyEtherBank
     }
 
     // Get account number from a owner address
-    function GetBankAccountNumber() public      
+    function GetBankAccountNumber() constant public      
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint32)
@@ -256,7 +256,7 @@ contract MyEtherBank
 
     /* -------- Account functions -------- */
 
-    function GetBankAccountBalance() public
+    function GetBankAccountBalance() constant public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint256)
