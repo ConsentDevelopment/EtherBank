@@ -25,10 +25,14 @@ contract MyEtherBank
     SOFTWARE.
 
     */
-
+	
     // Author : Alex Darby 
     // Contact email : consentdev@gmail.com 
     // Version : 1.0 - initial release
+	// 
+	// This smart contract is free to use but donations are always welcome!
+	// Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
+    // Donate Bitcoin - 36XRasACPNEvd3YxbLoWWeUfSgCUyZ69z8
 
     /* -------- State data -------- */
 
@@ -66,8 +70,6 @@ contract MyEtherBank
     {
         // Set the contract owner
         _owner = msg.sender; 
-        _connectBankAccountToNewOwnerAddressEnabled = true;
-        _bankDonationsBalance = 0; 
     }
 
 
@@ -94,7 +96,7 @@ contract MyEtherBank
         {
             // Does the bank account owner address match the sender address?
             uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
-            if (msg.sender != _bankAccountsArray[accountNumber_].owner )
+            if (msg.sender != _bankAccountsArray[accountNumber_].owner)
             {
                 throw;        
             }
