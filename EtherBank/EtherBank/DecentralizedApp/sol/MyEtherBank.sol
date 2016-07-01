@@ -30,9 +30,9 @@ contract MyEtherBank
     // Contact email : consentdev@gmail.com 
     // Version : 1.0 - initial release
 	// 
-	// This smart contract is free to use but donations are always welcome!
-	// Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
-    // Donate Bitcoin - 36XRasACPNEvd3YxbLoWWeUfSgCUyZ69z8
+	// This smart contract is free to use but donations are always welcome :
+	//   Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
+    //   Donate Bitcoin - 36XRasACPNEvd3YxbLoWWeUfSgCUyZ69z8
 
     /* -------- State data -------- */
 
@@ -487,7 +487,7 @@ contract MyEtherBank
             return false;           
         }
 
-        // Check the password sha3 hash matches.
+        // Check if the password sha3 hash matches.
         // VERY IMPORTANT -
         // 
         // Ethereum uses KECCAK-256. It should be noted that it does not follow the FIPS-202 based standard (a.k.a SHA-3), 
