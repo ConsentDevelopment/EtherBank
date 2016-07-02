@@ -143,7 +143,7 @@ contract MyEtherBank
     event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
-    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber);
+    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber);
 
 
     /* -------- Contract owner functions -------- */
@@ -540,7 +540,7 @@ contract MyEtherBank
         // Check if the password sha3 hash matches.
         if (sha3(passwordHash) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
-            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(accountNumber);
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber);
             return false;        
         }
 
