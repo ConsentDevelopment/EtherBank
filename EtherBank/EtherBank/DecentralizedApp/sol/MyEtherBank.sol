@@ -472,7 +472,7 @@ contract MyEtherBank
 
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
-        // Has thscont password hash been used before for this account?
+        // Has this password hash been used before for this account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
             event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(accountNumber_);
