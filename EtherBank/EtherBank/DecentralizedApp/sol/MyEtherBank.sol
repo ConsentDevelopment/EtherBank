@@ -150,6 +150,14 @@ contract MyEtherBank
         }
     }
 
+    function BankOwner_GetDonationsBalance() public      
+        modifier_isContractOwner()
+        modifier_wasValueSent()
+        returns (uint256)
+    {
+  	    return _bankDonationsBalance;
+    }
+
     function BankOwner_WithdrawDonations(address destinationAddress) public
         modifier_isContractOwner()
         modifier_wasValueSent()
@@ -464,7 +472,7 @@ contract MyEtherBank
 
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
-        // Has this password hash been used before for this account?
+        // Has thscont password hash been used before for this account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
             event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(accountNumber_);
