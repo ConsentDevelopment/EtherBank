@@ -314,7 +314,7 @@ contract MyEtherBank
     }
     
 
-    /* -------- Withdrawal / transform functions -------- */
+    /* -------- Withdrawal / transfer functions -------- */
 
     function WithdrawAmountFromBankAccount(uint256 amount) public
         modifier_doesSenderHaveABankAccount()
