@@ -533,10 +533,9 @@ contract MyEtherBank
             return false;           
         }
 
-        bytes memory passwordHash = bytes(password);
-
         // Check if the password sha3 hash matches.
-        if (sha3(passwordHash) != _bankAccountsArray[accountNumber].passwordSha3Hash)
+        bytes memory passwordString = bytes(password);
+        if (sha3(passwordString) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber);
             return false;        
