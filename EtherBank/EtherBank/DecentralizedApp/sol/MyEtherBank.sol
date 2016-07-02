@@ -161,7 +161,7 @@ contract MyEtherBank
   	    return _bankDonationsBalance;
     }
 
-    function BankOwner_WithdrawDonations(address destinationAddress) public
+    function BankOwner_WithdrawDonations() public
         modifier_isContractOwner()
         modifier_wasValueSent()
     { 
