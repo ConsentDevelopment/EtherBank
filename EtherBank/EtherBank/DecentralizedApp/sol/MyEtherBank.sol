@@ -471,6 +471,8 @@ contract MyEtherBank
         // 
         // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
 
+        // * Password used to create the hash must be below 32 characters and only use letters (uppercase or lowercase) and number characters.
+                 
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
@@ -488,7 +490,7 @@ contract MyEtherBank
         event_securityPasswordSha3HashAddedToBankAccount_Successful(accountNumber_);
     }
 
-    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, bytes32 password) public
+    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, string password) public
         modifier_wasValueSent()
         returns (bool)
     {
@@ -526,8 +528,10 @@ contract MyEtherBank
             return false;           
         }
 
+        bytes memory passwordHash = bytes(password);
+
         // Check if the password sha3 hash matches.
-        if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
+        if (sha3(passwordHash) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(accountNumber);
             return false;        
