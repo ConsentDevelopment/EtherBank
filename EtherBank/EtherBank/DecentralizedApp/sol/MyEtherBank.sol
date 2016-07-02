@@ -119,6 +119,7 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
+    event event_donationMadeToBank_ThankYou(uint256 donationAmount);
     event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
     event event_getBankAccountNumber_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
     event event_getBankAccountBalance_Successful(address indexed bankAccountOwner,  uint32 indexed bankAccountNumber, uint256 indexed balance);
@@ -148,6 +149,7 @@ contract MyEtherBank
         if (msg.value > 0)
         {
             _bankDonationsBalance += msg.value;
+            event_donationMadeToBank_ThankYou(msg.value);
         }
     }
 
