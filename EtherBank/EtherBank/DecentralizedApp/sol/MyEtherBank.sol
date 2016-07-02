@@ -134,7 +134,10 @@ contract MyEtherBank
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
 	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
+    event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
+    event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
+    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber);
 
 
     /* -------- Contract owner functions -------- */
@@ -456,6 +459,7 @@ contract MyEtherBank
         // Has this password hash been used before for this account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
+            event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(accountNumber_);
             return;        
         }
 
@@ -494,6 +498,7 @@ contract MyEtherBank
         // Has password sha3 hash been set?
         if (_bankAccountsArray[accountNumber].passwordSha3HashSet == false)
         {
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(accountNumber);
             return false;           
         }
 
@@ -506,6 +511,7 @@ contract MyEtherBank
         // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(accountNumber);
             return false;        
         }
 
