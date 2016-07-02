@@ -98,7 +98,7 @@ contract MyEtherBank
             uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
             if (msg.sender != _bankAccountsArray[accountNumber_].owner)
             {
-                // Owner address previously had a bank account that was transfered to a new owner address
+                // Sender address previously had a bank account that was transfered to a new owner address
                 throw;        
             }
         }
@@ -577,7 +577,7 @@ contract MyEtherBank
             }
             else
             {
-                // Owner address previously had a bank account that was transfered to a new owner address
+                // Sender address previously had a bank account that was transfered to a new owner address
                 throw;
             }
         }
