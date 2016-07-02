@@ -119,8 +119,12 @@ contract MyEtherBank
 
     /* -------- Events -------- */
 
+    // Donation
     event event_donationMadeToBank_ThankYou(uint256 donationAmount);
-    event event_getDonationsBalance(uint256 donationBalance);
+    event event_getBankDonationsBalance(uint256 donationBalance);
+    event event_bankDonationsWithdrawn(uint256 donationsAmount);
+
+    // General banking
     event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
     event event_getBankAccountNumber_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
     event event_getBankAccountBalance_Successful(address indexed bankAccountOwner,  uint32 indexed bankAccountNumber, uint256 indexed balance);
@@ -132,8 +136,7 @@ contract MyEtherBank
     event event_withdrawalMadeFromBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_transferMadeFromBankAccountToAddress_Successful(uint32 indexed bankAccountNumber, uint256 indexed transferalAmount, address indexed destinationAddress); 
     event event_transferMadeFromBankAccountToAddress_Failed(uint32 indexed bankAccountNumber, uint256 indexed transferalAmount, address indexed destinationAddress); 
-	event event_bankDonationsWithdrawn(uint256 donationsAmount);
- 
+
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
 	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
@@ -159,7 +162,7 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (uint256)
     {
-        event_getDonationsBalance(_bankDonationsBalance);
+        event_getBankDonationsBalance(_bankDonationsBalance);
   	    return _bankDonationsBalance;
     }
 
