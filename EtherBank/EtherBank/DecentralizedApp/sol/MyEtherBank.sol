@@ -477,9 +477,7 @@ contract MyEtherBank
         // which was finalized in August 2015.
         // 
         // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
-
-        // * Password used to create the hash must be below 32 characters and only use letters (uppercase or lowercase) and number characters.
-                 
+            
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
