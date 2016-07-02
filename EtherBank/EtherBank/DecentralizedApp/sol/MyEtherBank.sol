@@ -366,11 +366,12 @@ contract MyEtherBank
     {
         bool withdrawalSuccessful_ = false;
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+        uint256 fullBalance_ = 0;
 
         // Bank account has value that can be withdrawn?
         if (_bankAccountsArray[accountNumber_].balance > 0)
         {
-            uint256 fullBalance_ = _bankAccountsArray[accountNumber_].balance;
+            fullBalance_ = _bankAccountsArray[accountNumber_].balance;
 
             // Reduce the account balance 
             _bankAccountsArray[accountNumber_].balance = 0;
@@ -454,6 +455,13 @@ contract MyEtherBank
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
     {
+        // VERY IMPORTANT -
+        // 
+        // Ethereum uses KECCAK-256. It should be noted that it does not follow the FIPS-202 based standard (a.k.a SHA-3), 
+        // which was finalized in August 2015.
+        // 
+        // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
+
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
@@ -475,6 +483,13 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (bool)
     {
+        // VERY IMPORTANT -
+        // 
+        // Ethereum uses KECCAK-256. It should be noted that it does not follow the FIPS-202 based standard (a.k.a SHA-3), 
+        // which was finalized in August 2015.
+        // 
+        // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
+
         // Can bank accounts be connected to a new owner address?
         if (_connectBankAccountToNewOwnerAddressEnabled == false)
         {
@@ -503,12 +518,6 @@ contract MyEtherBank
         }
 
         // Check if the password sha3 hash matches.
-        // VERY IMPORTANT -
-        // 
-        // Ethereum uses KECCAK-256. It should be noted that it does not follow the FIPS-202 based standard (a.k.a SHA-3), 
-        // which was finalized in August 2015.
-        // 
-        // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
         if (sha3(password) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
             event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordHashDoesNotMatchAccountPasswordHash(accountNumber);
