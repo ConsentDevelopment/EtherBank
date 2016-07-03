@@ -146,7 +146,7 @@ contract MyEtherBank
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber, uint32 indexed passwordAttempts);
-    event event_securityGetNumberOfAttemptsToConnectAccountToANewOwnerAddress(uint32 indexed attempts);
+    event event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(uint32 indexed attempts);
 
     /* -------- Contract owner functions -------- */
 
@@ -578,17 +578,20 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
         _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
        
+        // Reset password attempts
+        _bankAccountsArray[accountNumber].passwordAttempts = 0;
+
         event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
         return true;
     }
 
-    function Security_getNumberOfAttemptsToConnectAccountToANewOwnerAddress() public
+    function Security_getNumberOfAttemptsToConnectBankAccountToANewOwnerAddress() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint64)
     {
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
-        event_securityGetNumberOfAttemptsToConnectAccountToANewOwnerAddress(_bankAccountsArray[accountNumber_].passwordAttempts);
+        event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(_bankAccountsArray[accountNumber_].passwordAttempts);
         return _bankAccountsArray[accountNumber_].passwordAttempts;
     }
 
