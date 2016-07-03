@@ -46,8 +46,8 @@ contract MyEtherBank
     {
         // Members placed in order for optimization, not readability
         bool passwordSha3HashSet;
-        uint8 passwordAttempts;
         uint32 number; 
+        uint32 passwordAttempts;
         uint256 balance;
         address owner;       
         bytes32 passwordSha3Hash;   
@@ -60,7 +60,6 @@ contract MyEtherBank
         uint32 accountNumber; // accountNumber member is used to index the bank accounts array
     }
  
-    uint8 constant _maximumPasswordAttempts = 10;
     uint32 private _totalBankAccounts = 0;
     BankAccount[] private _bankAccountsArray; 
     mapping(address => BankAccountAddress) private _bankAccountAddresses;  
@@ -141,12 +140,13 @@ contract MyEtherBank
 
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
+    event event_securityHasPasswordSha3HashBeenAddedToBankAccount(bool passwordSha3HashAdded);
 	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
     event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
-    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber, uint8 indexed passwordAttemptsRemaining);
-
+    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber, uint32 indexed passwordAttempts);
+    event event_securityGetNumberOfAttemptsToConnectAccountToANewOwnerAddress(uint32 indexed attempts);
 
     /* -------- Contract owner functions -------- */
 
@@ -470,6 +470,26 @@ contract MyEtherBank
 
     /* -------- Security functions -------- */
 
+    function Security_HasPasswordSha3HashBeenAddedToBankAccount() public
+        modifier_doesSenderHaveABankAccount()
+        modifier_wasValueSent()
+        returns (bool)
+    {
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+
+        // Password sha3 hash added to the account?
+        if (_bankAccountsArray[accountNumber_].passwordSha3HashSet)
+        {
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount(true);
+            return true;
+        }
+        else
+        {
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount(false);
+            return false;
+        }
+    }
+
     function Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
@@ -481,16 +501,12 @@ contract MyEtherBank
         // 
         // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
             
-        // ALSO VERY IMPORTANT -
-        //
-        // Use a long and complex password to build the hash.
-
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
-            event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(accountNumber_);
+            
             return;        
         }
 
@@ -547,20 +563,9 @@ contract MyEtherBank
         bytes memory passwordString = bytes(password);
         if (sha3(passwordString) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
-            // User only has a set number of password attempts before the associated account password is reset
-            _bankAccountsArray[accountNumber].passwordAttempts++;
-            uint8 attemptsRemaining =  _maximumPasswordAttempts - _bankAccountsArray[accountNumber].passwordAttempts;
-
-            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber, attemptsRemaining);
-        
-            // User has used up all the password attempts?
-            if (_bankAccountsArray[accountNumber].passwordAttempts >= _maximumPasswordAttempts)
-            {           
-                // Reset password sha3 hash
-      	        _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
-                _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
-            }
-
+            // Keep track of the number of attempts to connect a bank account to a new owner address
+            _bankAccountsArray[accountNumber].passwordAttempts++;  
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber, _bankAccountsArray[accountNumber].passwordAttempts); 
             return false;        
         }
 
@@ -575,6 +580,16 @@ contract MyEtherBank
        
         event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
         return true;
+    }
+
+    function Security_getNumberOfAttemptsToConnectAccountToANewOwnerAddress() public
+        modifier_doesSenderHaveABankAccount()
+        modifier_wasValueSent()
+        returns (uint64)
+    {
+        uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
+        event_securityGetNumberOfAttemptsToConnectAccountToANewOwnerAddress(_bankAccountsArray[accountNumber_].passwordAttempts);
+        return _bankAccountsArray[accountNumber_].passwordAttempts;
     }
 
 
