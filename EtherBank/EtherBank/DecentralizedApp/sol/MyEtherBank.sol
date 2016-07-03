@@ -127,12 +127,12 @@ contract MyEtherBank
 
     // General banking
     event event_bankAccountOpened_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
-    event event_getBankAccountNumber_Successful(address indexed bankAccountOwner, uint32 indexed bankAccountNumber);
-    event event_getBankAccountBalance_Successful(address indexed bankAccountOwner,  uint32 indexed bankAccountNumber, uint256 indexed balance);
+    event event_getBankAccountNumber_Successful(uint32 indexed bankAccountNumber);
+    event event_getBankAccountBalance_Successful(uint32 indexed bankAccountNumber, uint256 indexed balance);
     event event_depositMadeToBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
     event event_depositMadeToBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed depositAmount); 
-    event event_depositMadeToBankAccountFromDifferentAddress_Successful(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
-    event event_depositMadeToBankAccountFromDifferentAddress_Failed(address indexed addressFrom, uint32 indexed bankAccountNumber, uint256 indexed depositAmount);
+    event event_depositMadeToBankAccountFromDifferentAddress_Successful(uint32 indexed bankAccountNumber, address indexed addressFrom, uint256 indexed depositAmount);
+    event event_depositMadeToBankAccountFromDifferentAddress_Failed(uint32 indexed bankAccountNumber, address indexed addressFrom, uint256 indexed depositAmount);
     event event_withdrawalMadeFromBankAccount_Successful(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_withdrawalMadeFromBankAccount_Failed(uint32 indexed bankAccountNumber, uint256 indexed withdrawalAmount); 
     event event_transferMadeFromBankAccountToAddress_Successful(uint32 indexed bankAccountNumber, uint256 indexed transferalAmount, address indexed destinationAddress); 
@@ -140,14 +140,14 @@ contract MyEtherBank
 
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
-    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes();
-    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_No();
+    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes(uint32 indexed bankAccountNumber);
+    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_No(uint32 indexed bankAccountNumber);
 	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
     event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber, uint32 indexed passwordAttempts);
-    event event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(uint32 indexed attempts);
+    event event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(uint32 indexed bankAccountNumber, uint32 indexed attempts);
 
     /* -------- Contract owner functions -------- */
 
@@ -273,7 +273,7 @@ contract MyEtherBank
         modifier_wasValueSent()
         returns (uint32)
     {
-        event_getBankAccountNumber_Successful(msg.sender, _bankAccountAddresses[msg.sender].accountNumber);
+        event_getBankAccountNumber_Successful(_bankAccountAddresses[msg.sender].accountNumber);
 	    return _bankAccountAddresses[msg.sender].accountNumber;
     }
 
@@ -283,7 +283,7 @@ contract MyEtherBank
         returns (uint256)
     {   
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber;
-        event_getBankAccountBalance_Successful(msg.sender, accountNumber_, _bankAccountsArray[accountNumber_].balance);
+        event_getBankAccountBalance_Successful(accountNumber_, _bankAccountsArray[accountNumber_].balance);
         return _bankAccountsArray[accountNumber_].balance;
     }
 
@@ -315,7 +315,7 @@ contract MyEtherBank
         // Check if bank account number is valid
         if (accountNumber >= _totalBankAccounts)
         {
-           event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, accountNumber, msg.value);
+           event_depositMadeToBankAccountFromDifferentAddress_Failed(accountNumber, msg.sender, msg.value);
            return false;     
         }    
             
@@ -323,12 +323,12 @@ contract MyEtherBank
         if (msg.value > 0)
         {   
             _bankAccountsArray[accountNumber].balance += msg.value; 
-            event_depositMadeToBankAccountFromDifferentAddress_Successful(msg.sender, accountNumber, msg.value);
+            event_depositMadeToBankAccountFromDifferentAddress_Successful(accountNumber, msg.sender, msg.value);
             return true;
         }
         else
         {
-            event_depositMadeToBankAccountFromDifferentAddress_Failed(msg.sender, accountNumber, msg.value);
+            event_depositMadeToBankAccountFromDifferentAddress_Failed(accountNumber, msg.sender, msg.value);
             return false;
         }
     }
@@ -481,12 +481,12 @@ contract MyEtherBank
         // Password sha3 hash added to the account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashSet)
         {
-            event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes();
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes(accountNumber_);
             return true;
         }
         else
         {
-            event_securityHasPasswordSha3HashBeenAddedToBankAccount_No();
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount_No(accountNumber_);
             return false;
         }
     }
@@ -592,7 +592,7 @@ contract MyEtherBank
         returns (uint64)
     {
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
-        event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(_bankAccountsArray[accountNumber_].passwordAttempts);
+        event_securityGetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress(accountNumber_, _bankAccountsArray[accountNumber_].passwordAttempts);
         return _bankAccountsArray[accountNumber_].passwordAttempts;
     }
 
