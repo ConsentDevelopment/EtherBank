@@ -38,14 +38,17 @@ contract MyEtherBank
 
     // Owner
     address private _owner;
+
     uint256 private _bankDonationsBalance = 0;
     bool private _connectBankAccountToNewOwnerAddressEnabled = true;
+    uint8 constant _maximumPasswordAttempts = 10;
 
     // Bank accounts    
     struct BankAccount
     {
         // Members placed in order for optimization, not readability
         bool passwordSha3HashSet;
+        uint8 passwordAttempts;
         uint32 number; 
         uint256 balance;
         address owner;       
@@ -143,7 +146,7 @@ contract MyEtherBank
     event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
     event event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(uint32 indexed bankAccountNumber);
-    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber);
+    event event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(uint32 indexed bankAccountNumber, uint8 indexed passwordAttemptsRemaining);
 
 
     /* -------- Contract owner functions -------- */
@@ -232,6 +235,7 @@ contract MyEtherBank
             BankAccount(
             {
                 passwordSha3HashSet: false,
+                passwordAttempts: 0,
                 number: newBankAccountNumber,
                 balance: 0,
                 owner: msg.sender,
@@ -478,6 +482,10 @@ contract MyEtherBank
         // 
         // Keccak-256 generator link (produces same output as solidity sha3()) - http://emn178.github.io/online-tools/keccak_256.html
             
+        // ALSO VERY IMPORTANT -
+        //
+        // Use a long and complex password to build the hash.
+
         uint32 accountNumber_ = _bankAccountAddresses[msg.sender].accountNumber; 
 
         // Has this password hash been used before for this account?
@@ -491,6 +499,9 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber_].passwordSha3HashSet = true;
         _bankAccountsArray[accountNumber_].passwordSha3Hash = sha3Hash;
         _bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] = true;
+
+        // Reset password attempts
+        _bankAccountsArray[accountNumber_].passwordAttempts = 0;
 
         event_securityPasswordSha3HashAddedToBankAccount_Successful(accountNumber_);
     }
@@ -537,7 +548,20 @@ contract MyEtherBank
         bytes memory passwordString = bytes(password);
         if (sha3(passwordString) != _bankAccountsArray[accountNumber].passwordSha3Hash)
         {
-            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber);
+            // User only has a set number of password attempts before the associated account password is reset
+            _bankAccountsArray[accountNumber].passwordAttempts++;
+            uint8 attemptsRemaining =  _maximumPasswordAttempts - _bankAccountsArray[accountNumber].passwordAttempts;
+
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber, attemptsRemaining);
+        
+            // User has used up all the password attempts?
+            if (_bankAccountsArray[accountNumber].passwordAttempts >= _maximumPasswordAttempts)
+            {           
+                // Reset password sha3 hash
+      	        _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
+                _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
+            }
+
             return false;        
         }
 
