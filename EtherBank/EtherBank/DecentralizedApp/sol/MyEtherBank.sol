@@ -597,6 +597,10 @@ contract MyEtherBank
                     _bankAccountsArray[accountNumber_].balance += msg.value;
                     event_depositMadeToBankAccount_Successful(accountNumber_, msg.value);
                 }
+                else
+                {
+                    throw;
+                }
             }
             else
             {
