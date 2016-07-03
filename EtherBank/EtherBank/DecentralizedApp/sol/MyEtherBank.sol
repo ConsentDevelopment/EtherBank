@@ -494,6 +494,7 @@ contract MyEtherBank
     function Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash) public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
+        returns (bool)
     {
         // VERY IMPORTANT -
         // 
@@ -507,8 +508,8 @@ contract MyEtherBank
         // Has this password hash been used before for this account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashesUsed[sha3Hash] == true)
         {
-            
-            return;        
+            event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(accountNumber_);
+            return false;        
         }
 
         // Set the account password sha3 hash
@@ -520,6 +521,7 @@ contract MyEtherBank
         _bankAccountsArray[accountNumber_].passwordAttempts = 0;
 
         event_securityPasswordSha3HashAddedToBankAccount_Successful(accountNumber_);
+        return true;
     }
 
     function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, string password) public
@@ -543,7 +545,7 @@ contract MyEtherBank
         // Check if bank account number is valid
         if (accountNumber >= _totalBankAccounts)
         {
-           return false;     
+            return false;     
         }    
 
         // Does the sender already have a bank account?
