@@ -140,7 +140,8 @@ contract MyEtherBank
 
     // Security
     event event_securityConnectingABankAccountToANewOwnerAddressIsDisabled();
-    event event_securityHasPasswordSha3HashBeenAddedToBankAccount(bool passwordSha3HashAdded);
+    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes();
+    event event_securityHasPasswordSha3HashBeenAddedToBankAccount_No();
 	event event_securityPasswordSha3HashAddedToBankAccount_Successful(uint32 indexed bankAccountNumber);
     event event_securityPasswordSha3HashAddedToBankAccount_Failed_PasswordHashPreviouslyUsed(uint32 indexed bankAccountNumber);
     event event_securityBankAccountConnectedToNewAddressOwner_Successful(uint32 indexed bankAccountNumber, address indexed newAddressOwner);
@@ -480,12 +481,12 @@ contract MyEtherBank
         // Password sha3 hash added to the account?
         if (_bankAccountsArray[accountNumber_].passwordSha3HashSet)
         {
-            event_securityHasPasswordSha3HashBeenAddedToBankAccount(true);
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount_Yes();
             return true;
         }
         else
         {
-            event_securityHasPasswordSha3HashBeenAddedToBankAccount(false);
+            event_securityHasPasswordSha3HashBeenAddedToBankAccount_No();
             return false;
         }
     }
