@@ -257,12 +257,6 @@ contract MyEtherBank
         // Value sent?
         if (msg.value > 0)
         {         
-            // Check for overflow  
-            if ((_bankAccountsArray[newBankAccountNumber].balance + msg.value) < _bankAccountsArray[newBankAccountNumber].balance)
-            {
-                throw;
-            }
-
             _bankAccountsArray[newBankAccountNumber].balance += msg.value;
         }
 
