@@ -5,7 +5,7 @@ My Ether Bank is a Ethereum contract that gives users the ability to safely and 
 
 This contract also has security interface methods for connecting a bank account to a different owner address (wallet account - normal or contract).  This is useful in case your local wallet / keys (stored on PC, mobile, usb or a piece of paper) is lost, stolen or destroyed as you will be able to recover you ether funds in full using the contract.
 
-This contract with the following banking interface methods :
+The contract has the following banking interface methods :
 
 * OpenBankAccount() - send payment transaction (ether sent will be deposited to your account) or use interface method.
 * GetBankAccountNumber()
