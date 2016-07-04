@@ -32,7 +32,7 @@ Once you have opened a bank account then you can secure your account using the f
 1. Call the interface method GetBankAccountNumber(). Store this number in a safe location. 
 
 2. Call the interface method Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash) and pass in your password sha3 hash.
-   Use the following link to convert your password to a sha3 hash - https://emn178.github.io/online-tools/keccak_256.html (you can also use other sha3 generators as long as they use Keccak-256 encoding). VERY IMPORTANT - use a long and complex password (mixture of lowercase / uppercase characters and numbers) only pass in the sha3 hash result of your password into this interface. DO NOT pass in your actual password.
+   Use the following link to convert your password to a sha3 hash - https://emn178.github.io/online-tools/keccak_256.html (you can also use other sha3 generators as long as they use Keccak-256 encoding). VERY IMPORTANT - use a long and complex password (mixture of lowercase / uppercase characters and numbers) and only pass in the sha3 hash result of your password into this interface. DO NOT pass in your actual password.
 
 3. Keep the bank account number (see point 1. above) and password (see point 2. above) together in a safe and secure location. You will need this number and password to retreive your full ether balance on the contract.
     
