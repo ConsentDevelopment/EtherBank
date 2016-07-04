@@ -7,10 +7,10 @@ This contract also has security interfaces for connecting a bank account to a di
 
 This contract with the following banking interfaces :
 
-* OpenBankAccount() - send payment transaction (ether value will be deposited to account) or use interface method.
+* OpenBankAccount() - send payment transaction (ether sent will be deposited to account) or use interface method.
 * GetBankAccountNumber()
 * GetBankAccountBalance()
-* DepositToBankAccount() - send payment transaction (ether value will be deposited to account) or use interface method.
+* DepositToBankAccount() - send payment transaction (ether sent will be deposited to account) or use interface method.
 * DepositToBankAccountFromDifferentAddress(uint32 bankAccountNumber)
 * WithdrawAmountFromBankAccount(uint256 amount)
 * WithdrawFullBalanceFromBankAccount()
@@ -23,6 +23,7 @@ And security interfaces :
 * Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password)
 * Security_GetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress()
 
+Note : Only the interfaces OpenBankAccount() (used the 1st time to open a bank account), DepositToBankAccount() and DepositToBankAccountFromDifferentAddress() will accept ether value from a payment transaction. This is to prevent users accidentally sending ether when using interfaces that do not require ether to be sent.
 
 ## Securing your My Ether Bank account :
 
