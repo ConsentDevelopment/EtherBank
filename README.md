@@ -23,7 +23,7 @@ And security interfaces :
 * Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password)
 * Security_GetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress()
 
-Note : Only the interfaces OpenBankAccount() (used the 1st time to open a bank account), DepositToBankAccount() and DepositToBankAccountFromDifferentAddress() will accept ether value from a payment transaction. This is to prevent users accidentally sending ether when using interfaces that do not require ether to be sent.
+Note : Only the interface methods OpenBankAccount() (used the 1st time to open a bank account), DepositToBankAccount() and DepositToBankAccountFromDifferentAddress() will accept ether value from a payment transaction. This is to prevent users accidentally sending ether when using interfaces that do not require ether to be sent.
 
 ## Securing your My Ether Bank account :
 
