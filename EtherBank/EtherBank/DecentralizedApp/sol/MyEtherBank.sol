@@ -317,13 +317,13 @@ contract MyEtherBank
         }
     }
 
-    function DepositToBankAccountFromDifferentAddress(uint32 accountNumber) public
+    function DepositToBankAccountFromDifferentAddress(uint32 bankAccountNumber) public
         returns (bool)
     {
         // Check if bank account number is valid
-        if (accountNumber >= _totalBankAccounts)
+        if (bankAccountNumber >= _totalBankAccounts)
         {
-           event_depositMadeToBankAccountFromDifferentAddress_Failed(accountNumber, msg.sender, msg.value);
+           event_depositMadeToBankAccountFromDifferentAddress_Failed(bankAccountNumber, msg.sender, msg.value);
            return false;     
         }    
             
@@ -331,18 +331,18 @@ contract MyEtherBank
         if (msg.value > 0)
         {   
             // Check for overflow  
-            if ((_bankAccountsArray[accountNumber].balance + msg.value) < _bankAccountsArray[accountNumber].balance)
+            if ((_bankAccountsArray[bankAccountNumber].balance + msg.value) < _bankAccountsArray[bankAccountNumber].balance)
             {
                 throw;
             }
 
-            _bankAccountsArray[accountNumber].balance += msg.value; 
-            event_depositMadeToBankAccountFromDifferentAddress_Successful(accountNumber, msg.sender, msg.value);
+            _bankAccountsArray[bankAccountNumber].balance += msg.value; 
+            event_depositMadeToBankAccountFromDifferentAddress_Successful(bankAccountNumber, msg.sender, msg.value);
             return true;
         }
         else
         {
-            event_depositMadeToBankAccountFromDifferentAddress_Failed(accountNumber, msg.sender, msg.value);
+            event_depositMadeToBankAccountFromDifferentAddress_Failed(bankAccountNumber, msg.sender, msg.value);
             return false;
         }
     }
@@ -538,7 +538,7 @@ contract MyEtherBank
         return true;
     }
 
-    function Security_ConnectBankAccountToNewOwnerAddress(uint32 accountNumber, string password) public
+    function Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password) public
         modifier_wasValueSent()
         returns (bool)
     {
@@ -557,7 +557,7 @@ contract MyEtherBank
         }
 
         // Check if bank account number is valid
-        if (accountNumber >= _totalBankAccounts)
+        if (bankAccountNumber >= _totalBankAccounts)
         {
             return false;     
         }    
@@ -570,35 +570,35 @@ contract MyEtherBank
         }
 
         // Has password sha3 hash been set?
-        if (_bankAccountsArray[accountNumber].passwordSha3HashSet == false)
+        if (_bankAccountsArray[bankAccountNumber].passwordSha3HashSet == false)
         {
-            event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(accountNumber);
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_PasswordHashHasNotBeenAddedToBankAccount(bankAccountNumber);
             return false;           
         }
 
         // Check if the password sha3 hash matches.
         bytes memory passwordString = bytes(password);
-        if (sha3(passwordString) != _bankAccountsArray[accountNumber].passwordSha3Hash)
+        if (sha3(passwordString) != _bankAccountsArray[bankAccountNumber].passwordSha3Hash)
         {
             // Keep track of the number of attempts to connect a bank account to a new owner address
-            _bankAccountsArray[accountNumber].passwordAttempts++;  
-            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(accountNumber, _bankAccountsArray[accountNumber].passwordAttempts); 
+            _bankAccountsArray[bankAccountNumber].passwordAttempts++;  
+            event_securityBankAccountConnectedToNewAddressOwner_Failed_SentPasswordDoesNotMatchAccountPasswordHash(bankAccountNumber, _bankAccountsArray[bankAccountNumber].passwordAttempts); 
             return false;        
         }
 
         // Set new bank account address owner and the update the owner address details 
-        _bankAccountsArray[accountNumber].owner = msg.sender;
+        _bankAccountsArray[bankAccountNumber].owner = msg.sender;
         _bankAccountAddresses[msg.sender].accountSet = true;
-        _bankAccountAddresses[msg.sender].accountNumber = accountNumber;
+        _bankAccountAddresses[msg.sender].accountNumber = bankAccountNumber;
 
         // Reset password sha3 hash
-        _bankAccountsArray[accountNumber].passwordSha3HashSet = false;
-        _bankAccountsArray[accountNumber].passwordSha3Hash = "0";
+        _bankAccountsArray[bankAccountNumber].passwordSha3HashSet = false;
+        _bankAccountsArray[bankAccountNumber].passwordSha3Hash = "0";
        
         // Reset password attempts
-        _bankAccountsArray[accountNumber].passwordAttempts = 0;
+        _bankAccountsArray[bankAccountNumber].passwordAttempts = 0;
 
-        event_securityBankAccountConnectedToNewAddressOwner_Successful(accountNumber, msg.sender);
+        event_securityBankAccountConnectedToNewAddressOwner_Successful(bankAccountNumber, msg.sender);
         return true;
     }
 
