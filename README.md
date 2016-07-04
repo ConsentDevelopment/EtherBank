@@ -27,6 +27,8 @@ Note : Only the interface methods OpenBankAccount() (used the 1st time to open a
 
 ## Securing your My Ether Bank account :
 
+VERY IMPORTANT - please use the latest offical Ethereum wallet (if you use the Ethereum wallet client). Link - https://github.com/ethereum/mist/releases
+
 Once you have opened a bank account then you can secure your account using the following process -
 
 1. Call the interface method GetBankAccountNumber(). Store this number in a safe location. 
