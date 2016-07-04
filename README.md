@@ -1,4 +1,4 @@
-# My Ether Bank
+# My Ether Bank - Ethereum smart contract
 ## Deposit, withdraw and transfer ether with no charges!
 
 My Ether Bank is a Ethereum contract that gives users the ability to safely and securely store ether on the blockchain (like a wallet existing on the blockchain).
