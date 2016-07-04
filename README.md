@@ -22,3 +22,19 @@ And security interfaces :
 * Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash)
 * Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password)
 * Security_getNumberOfAttemptsToConnectBankAccountToANewOwnerAddress()
+
+
+## Securing your My Ether Bank account :
+
+
+
+
+## Developer and license information :
+
+If you have any questions or issues regarding this contract then send a email to consentdev@gmail.com 
+
+LICENSE - This Ethereum contract uses a MIT License.
+
+This smart contract is free to use but donations are always welcome :
+* Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
+* Donate Bitcoin - 36XRasACPNEvd3YxbLoWWeUfSgCUyZ69z8 
