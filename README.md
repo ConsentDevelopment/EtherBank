@@ -39,7 +39,7 @@ Once you have opened a bank account then you can secure your account using the f
 3. Keep the bank account number (see point 1. above) and password (see point 2. above) together in a safe and secure location. You will need this number and password to retreive your full ether balance on the contract.
     
 4. If your wallet / keys that you used to open a bank acount are lost, stolen or destroyed then you can create a new wallet / key address and call the interface method 
-Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password) and pass in your bank account number (see point 1. above) and the password you used to create a sha3 hash (see point 2. above).  If the password hash values match then the bank account will be connected to the new caller address.
+Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password) and pass in your bank account number (see point 1. above) and the password you used to create a sha3 hash (see point 2. above).  If the password hash values match then the bank account will be connected to the new caller address and you will be able to retrieve your full ether balance.
 
 Important - You can call the interface method Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash) as many times as you want but you cannot use a previous passed in hash.  Once a bank account is successfully connected to a new owner address then the stored bank account hash is reset and you will need to repeat the above process using the new owner address.
 
