@@ -602,7 +602,7 @@ contract MyEtherBank
         return true;
     }
 
-    function Security_getNumberOfAttemptsToConnectBankAccountToANewOwnerAddress() public
+    function Security_GetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress() public
         modifier_doesSenderHaveABankAccount()
         modifier_wasValueSent()
         returns (uint64)

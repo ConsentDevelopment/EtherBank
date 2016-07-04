@@ -21,7 +21,7 @@ And security interfaces :
 * Security_HasPasswordSha3HashBeenAddedToBankAccount()
 * Security_AddPasswordSha3HashToBankAccount(bytes32 sha3Hash)
 * Security_ConnectBankAccountToNewOwnerAddress(uint32 bankAccountNumber, string password)
-* Security_getNumberOfAttemptsToConnectBankAccountToANewOwnerAddress()
+* Security_GetNumberOfAttemptsToConnectBankAccountToANewOwnerAddress()
 
 
 ## Securing your My Ether Bank account :
