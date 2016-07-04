@@ -1,7 +1,7 @@
 # My Ether Bank - Ethereum smart contract
 ## Deposit, withdraw and transfer ether with no charges!
 
-My Ether Bank is a Ethereum contract that gives users the ability to safely and securely store ether on the blockchain (like a wallet existing on the blockchain).
+My Ether Bank is an Ethereum contract that gives users the ability to safely and securely store ether on the blockchain (like a wallet existing on the blockchain).
 
 This contract also has security interface methods for connecting a bank account to a different owner address (wallet account - normal or contract).  This is useful in case your local wallet / keys (stored on PC, mobile, usb or a piece of paper) is lost, stolen or destroyed as you will be able to recover you ether funds in full using the contract.
 
@@ -47,7 +47,7 @@ Important - You can call the interface method Security_AddPasswordSha3HashToBank
 
 If you have any questions or issues regarding this contract then send a email to consentdev@gmail.com 
 
-LICENSE - This Ethereum contract uses a MIT License.
+LICENSE - This Ethereum contract uses an MIT License.
 
 This smart contract is free to use but donations are always welcome :
 * Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
