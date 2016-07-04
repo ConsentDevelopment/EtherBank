@@ -45,7 +45,7 @@ Important - You can call the interface method Security_AddPasswordSha3HashToBank
 
 ## Developer and license information :
 
-If you have any questions or issues regarding this contract then send a email to consentdev@gmail.com 
+If you have any questions or issues regarding this contract then send an email to consentdev@gmail.com 
 
 LICENSE - This Ethereum contract uses an MIT License.
 
