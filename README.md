@@ -7,10 +7,10 @@ This contract also has security interface methods for connecting a bank account 
 
 This contract with the following banking interface methods :
 
-* OpenBankAccount() - send payment transaction (ether sent will be deposited to account) or use interface method.
+* OpenBankAccount() - send payment transaction (ether sent will be deposited to your account) or use interface method.
 * GetBankAccountNumber()
 * GetBankAccountBalance()
-* DepositToBankAccount() - send payment transaction (ether sent will be deposited to account) or use interface method.
+* DepositToBankAccount() - send payment transaction (ether sent will be deposited to your account) or use interface method.
 * DepositToBankAccountFromDifferentAddress(uint32 bankAccountNumber)
 * WithdrawAmountFromBankAccount(uint256 amount)
 * WithdrawFullBalanceFromBankAccount()
