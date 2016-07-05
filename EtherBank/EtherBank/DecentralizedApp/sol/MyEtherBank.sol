@@ -29,7 +29,9 @@ contract MyEtherBank
     // Author : Alex Darby 
     // Contact email : consentdev@gmail.com 
     // Version : 1.0 - initial release
-	// 
+	// GitHub : https://github.com/ConsentDevelopment/EtherBank
+    //
+    // 
 	// This smart contract is free to use but donations are always welcome :
 	//   Donate Ether - 0x65850dfd9c511a5da3132461d57817f56acc1906
     //   Donate Bitcoin - 36XRasACPNEvd3YxbLoWWeUfSgCUyZ69z8
